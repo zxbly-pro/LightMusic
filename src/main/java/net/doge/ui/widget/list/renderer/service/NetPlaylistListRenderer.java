@@ -42,6 +42,8 @@ public class NetPlaylistListRenderer extends CustomListCellRenderer {
 
     private static ImageIcon playlistIcon = new ImageIcon(ImageUtil.width(LMIconManager.getImage("list.playlistItem"), ImageConstants.MEDIUM_WIDTH));
 
+    private final ImageIcon reusableIcon = new ImageIcon();
+
     public NetPlaylistListRenderer() {
         init();
     }
@@ -63,6 +65,8 @@ public class NetPlaylistListRenderer extends CustomListCellRenderer {
         playCountLabel.setOpacity(opacity);
         trackCountLabel.setOpacity(opacity);
 
+        outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
+
         int sh = ScaleUtil.scale(10);
         outerPanel.add(CustomBox.createVerticalStrut(sh));
         outerPanel.add(iconLabel);
@@ -81,18 +85,23 @@ public class NetPlaylistListRenderer extends CustomListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         NetPlaylistInfo playlistInfo = (NetPlaylistInfo) value;
 
-        iconLabel.setIcon(playlistInfo.hasCoverImgThumb() ? new ImageIcon(playlistInfo.getCoverImgThumb()) : playlistIcon);
+        if (playlistInfo.hasCoverImgThumb()) {
+            reusableIcon.setImage(playlistInfo.getCoverImgThumb());
+            iconLabel.setIcon(reusableIcon);
+        } else {
+            iconLabel.setIcon(playlistIcon);
+        }
 
         outerPanel.setForeground(isSelected ? selectedColor : foreColor);
 
         iconLabel.setForeground(textColor);
         nameLabel.setForeground(textColor);
         creatorLabel.setForeground(textColor);
-        playCountLabel.setForeground(textColor);
         trackCountLabel.setForeground(textColor);
+        playCountLabel.setForeground(textColor);
 
-        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
-        outerPanel.setLayout(layout);
+//        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
+//        outerPanel.setLayout(layout);
 
         int pw = RendererConstants.CELL_WIDTH, tw = RendererConstants.TEXT_WIDTH;
         String source = "<html></html>";

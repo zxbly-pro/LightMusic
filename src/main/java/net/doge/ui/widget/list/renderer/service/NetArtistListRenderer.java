@@ -41,6 +41,8 @@ public class NetArtistListRenderer extends CustomListCellRenderer {
 
     private static ImageIcon artistIcon = new ImageIcon(ImageUtil.width(LMIconManager.getImage("list.artistItem"), ImageConstants.MEDIUM_WIDTH));
 
+    private final ImageIcon reusableIcon = new ImageIcon();
+
     public NetArtistListRenderer() {
         init();
     }
@@ -62,6 +64,8 @@ public class NetArtistListRenderer extends CustomListCellRenderer {
         albumNumLabel.setOpacity(opacity);
         mvNumLabel.setOpacity(opacity);
 
+        outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
+
         int sh = ScaleUtil.scale(10);
         outerPanel.add(CustomBox.createVerticalStrut(sh));
         outerPanel.add(iconLabel);
@@ -80,7 +84,12 @@ public class NetArtistListRenderer extends CustomListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         NetArtistInfo artistInfo = (NetArtistInfo) value;
 
-        iconLabel.setIcon(artistInfo.hasCoverImgThumb() ? new ImageIcon(artistInfo.getCoverImgThumb()) : artistIcon);
+        if (artistInfo.hasCoverImgThumb()) {
+            reusableIcon.setImage(artistInfo.getCoverImgThumb());
+            iconLabel.setIcon(reusableIcon);
+        } else {
+            iconLabel.setIcon(artistIcon);
+        }
 
         outerPanel.setForeground(isSelected ? selectedColor : foreColor);
         iconLabel.setForeground(textColor);
@@ -89,8 +98,8 @@ public class NetArtistListRenderer extends CustomListCellRenderer {
         albumNumLabel.setForeground(textColor);
         mvNumLabel.setForeground(textColor);
 
-        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
-        outerPanel.setLayout(layout);
+//        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
+//        outerPanel.setLayout(layout);
 
         int pw = RendererConstants.CELL_WIDTH, tw = RendererConstants.TEXT_WIDTH;
         String source = "<html></html>";

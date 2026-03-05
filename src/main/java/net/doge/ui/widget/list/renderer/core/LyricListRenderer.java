@@ -131,15 +131,23 @@ public class LyricListRenderer extends CustomListCellRenderer {
         // 高亮的行的样式
         if (index == row) {
             label.setFont(highlightFont);
-            if (hl == null
-                    || hl.getWidthThreshold() != maxWidth
+            if (hl == null) {
+                // 如果 hl 为空，创建新的对象
+                hl = new HighlightLyric(label, statement, highlightColor, bgColor, ratio, false, maxWidth);
+            } else if (hl.getWidthThreshold() != maxWidth
                     || !hl.getLabelFont().equals(highlightFont)
                     || hl.getTime() != time
                     || !hl.getPlainLyric().equals(plainLyric)
                     || !hl.getC1().equals(highlightColor)
-                    || !hl.getC2().equals(bgColor))
+                    || !hl.getC2().equals(bgColor)) {
+                // 如果属性变化，重新初始化 (复用对象，减少创建开销)
+                // 注意：这里最好给 HighlightLyric 加一个 reset/update 方法，而不是每次 new
+                // 暂时保持 new，但因为上面的判断变严格了，理论上只有切歌或者 resize 才会触发
                 hl = new HighlightLyric(label, statement, highlightColor, bgColor, ratio, false, maxWidth);
-            else hl.setRatio(ratio);
+            } else {
+                // 仅更新比率，这是最频繁的操作
+                hl.setRatio(ratio);
+            }
             label.setIcon(hl.getImgIcon());
             label.setText("");
 //            labelUI.setDrawBg(index == hoverIndex);

@@ -44,6 +44,8 @@ public class NetRadioListRenderer extends CustomListCellRenderer {
 
     private static ImageIcon radioIcon = new ImageIcon(ImageUtil.width(LMIconManager.getImage("list.radioItem"), ImageConstants.MEDIUM_WIDTH));
 
+    private final ImageIcon reusableIcon = new ImageIcon();
+
     public NetRadioListRenderer() {
         init();
     }
@@ -68,6 +70,8 @@ public class NetRadioListRenderer extends CustomListCellRenderer {
         trackCountLabel.setOpacity(opacity);
         playCountLabel.setOpacity(opacity);
 
+        outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
+
         int sh = ScaleUtil.scale(10);
         outerPanel.add(CustomBox.createVerticalStrut(sh));
         outerPanel.add(iconLabel);
@@ -88,7 +92,12 @@ public class NetRadioListRenderer extends CustomListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         NetRadioInfo radioInfo = (NetRadioInfo) value;
 
-        iconLabel.setIcon(radioInfo.hasCoverImgThumb() ? new ImageIcon(radioInfo.getCoverImgThumb()) : radioIcon);
+        if (radioInfo.hasCoverImgThumb()) {
+            reusableIcon.setImage(radioInfo.getCoverImgThumb());
+            iconLabel.setIcon(reusableIcon);
+        } else {
+            iconLabel.setIcon(radioIcon);
+        }
 
         outerPanel.setForeground(isSelected ? selectedColor : foreColor);
         iconLabel.setForeground(textColor);
@@ -99,8 +108,8 @@ public class NetRadioListRenderer extends CustomListCellRenderer {
         playCountLabel.setForeground(textColor);
 //        createTimeLabel.setForeground(textColor);
 
-        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
-        outerPanel.setLayout(layout);
+//        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
+//        outerPanel.setLayout(layout);
 
         int pw = RendererConstants.CELL_WIDTH, tw = RendererConstants.TEXT_WIDTH;
         String source = "<html></html>";

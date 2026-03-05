@@ -41,6 +41,8 @@ public class NetAlbumListRenderer extends CustomListCellRenderer {
 
     private static ImageIcon albumIcon = new ImageIcon(ImageUtil.width(LMIconManager.getImage("list.albumItem"), ImageConstants.MEDIUM_WIDTH));
 
+    private final ImageIcon reusableIcon = new ImageIcon();
+
     public NetAlbumListRenderer() {
         init();
     }
@@ -62,6 +64,8 @@ public class NetAlbumListRenderer extends CustomListCellRenderer {
         songNumLabel.setOpacity(opacity);
         publishTimeLabel.setOpacity(opacity);
 
+        outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
+
         int sh = ScaleUtil.scale(10);
         outerPanel.add(CustomBox.createVerticalStrut(sh));
         outerPanel.add(iconLabel);
@@ -80,7 +84,12 @@ public class NetAlbumListRenderer extends CustomListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         NetAlbumInfo albumInfo = (NetAlbumInfo) value;
 
-        iconLabel.setIcon(albumInfo.hasCoverImgThumb() ? new ImageIcon(albumInfo.getCoverImgThumb()) : albumIcon);
+        if (albumInfo.hasCoverImgThumb()) {
+            reusableIcon.setImage(albumInfo.getCoverImgThumb());
+            iconLabel.setIcon(reusableIcon);
+        } else {
+            iconLabel.setIcon(albumIcon);
+        }
 
         outerPanel.setForeground(isSelected ? selectedColor : foreColor);
         iconLabel.setForeground(textColor);
@@ -89,8 +98,8 @@ public class NetAlbumListRenderer extends CustomListCellRenderer {
         songNumLabel.setForeground(textColor);
         publishTimeLabel.setForeground(textColor);
 
-        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
-        outerPanel.setLayout(layout);
+//        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
+//        outerPanel.setLayout(layout);
 
         int pw = RendererConstants.CELL_WIDTH, tw = RendererConstants.TEXT_WIDTH;
         String source = "<html></html>";

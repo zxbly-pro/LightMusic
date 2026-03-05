@@ -11,7 +11,10 @@ import net.doge.util.core.StringUtil;
 import net.doge.util.core.io.FileUtil;
 
 import java.awt.image.BufferedImage;
+import java.lang.ref.SoftReference;
 import java.util.Objects;
+
+import net.doge.util.core.img.ImageCache;
 
 /**
  * @author Doge
@@ -45,7 +48,7 @@ public class NetMvInfo implements NetResource, Downloadable {
     // 封面图片 url
     private String coverImgUrl;
     // 封面图片缩略图
-    private BufferedImage coverImgThumb;
+    private SoftReference<BufferedImage> coverImgThumbRef;
     // 播放 url
     private String playUrl;
     // 下载 url
@@ -91,8 +94,17 @@ public class NetMvInfo implements NetResource, Downloadable {
     }
 
     public void setCoverImgThumb(BufferedImage coverImgThumb) {
-        this.coverImgThumb = coverImgThumb;
+        if (StringUtil.notEmpty(coverImgUrl)) {
+            ImageCache.put(coverImgUrl, coverImgThumb);
+        } else {
+            this.coverImgThumbRef = new SoftReference<>(coverImgThumb);
+        }
         callback();
+    }
+    
+    public BufferedImage getCoverImgThumb() {
+        if (StringUtil.notEmpty(coverImgUrl)) return ImageCache.get(coverImgUrl);
+        return coverImgThumbRef != null ? coverImgThumbRef.get() : null;
     }
 
     private void callback() {
@@ -134,7 +146,8 @@ public class NetMvInfo implements NetResource, Downloadable {
     }
 
     public boolean hasCoverImgThumb() {
-        return coverImgThumb != null;
+        if (StringUtil.notEmpty(coverImgUrl)) return ImageCache.get(coverImgUrl) != null;
+        return coverImgThumbRef != null && coverImgThumbRef.get() != null;
     }
 
     public boolean hasPlayUrl() {

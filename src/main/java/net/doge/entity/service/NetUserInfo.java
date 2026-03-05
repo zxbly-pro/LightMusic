@@ -7,7 +7,10 @@ import net.doge.util.core.StringUtil;
 import net.doge.util.core.time.TimeUtil;
 
 import java.awt.image.BufferedImage;
+import java.lang.ref.SoftReference;
 import java.util.Objects;
+
+import net.doge.util.core.img.ImageCache;
 
 /**
  * @author Doge
@@ -33,15 +36,15 @@ public class NetUserInfo implements NetResource {
     // 号龄
     private String accAge;
     // 头像
-    private BufferedImage avatar;
+    private SoftReference<BufferedImage> avatarRef;
     // 头像 url
     private String avatarUrl;
     // 头像缩略图
-    private BufferedImage avatarThumb;
+    private SoftReference<BufferedImage> avatarThumbRef;
     // 头像缩略图 url
     private String avatarThumbUrl;
     // 背景图
-    private BufferedImage bgImg;
+    private SoftReference<BufferedImage> bgImgRef;
     // 背景图 url
     private String bgImgUrl;
     // 签名
@@ -56,7 +59,7 @@ public class NetUserInfo implements NetResource {
     private Integer radioCount;
     // 节目数
     private Integer programCount;
-
+    
     // 缩略图加载后的回调函数
     private Runnable invokeLater;
     private Runnable invokeLater2;
@@ -103,7 +106,13 @@ public class NetUserInfo implements NetResource {
     }
 
     public boolean hasAvatar() {
-        return avatar != null;
+        if (StringUtil.notEmpty(avatarUrl)) return ImageCache.get(avatarUrl) != null;
+        return avatarRef != null && avatarRef.get() != null;
+    }
+    
+    public BufferedImage getAvatar() {
+        if (StringUtil.notEmpty(avatarUrl)) return ImageCache.get(avatarUrl);
+        return avatarRef != null ? avatarRef.get() : null;
     }
 
     public boolean hasBgImgUrl() {
@@ -111,7 +120,13 @@ public class NetUserInfo implements NetResource {
     }
 
     public boolean hasBgImg() {
-        return bgImg != null;
+        if (StringUtil.notEmpty(bgImgUrl)) return ImageCache.get(bgImgUrl) != null;
+        return bgImgRef != null && bgImgRef.get() != null;
+    }
+    
+    public BufferedImage getBgImg() {
+        if (StringUtil.notEmpty(bgImgUrl)) return ImageCache.get(bgImgUrl);
+        return bgImgRef != null ? bgImgRef.get() : null;
     }
 
     public boolean hasName() {
@@ -163,20 +178,37 @@ public class NetUserInfo implements NetResource {
     }
 
     public void setAvatarThumb(BufferedImage avatarThumb) {
-        this.avatarThumb = avatarThumb;
+        if (StringUtil.notEmpty(avatarThumbUrl)) {
+            ImageCache.put(avatarThumbUrl, avatarThumb);
+        } else {
+            this.avatarThumbRef = new SoftReference<>(avatarThumb);
+        }
         callback();
+    }
+    
+    public BufferedImage getAvatarThumb() {
+        if (StringUtil.notEmpty(avatarThumbUrl)) return ImageCache.get(avatarThumbUrl);
+        return avatarThumbRef != null ? avatarThumbRef.get() : null;
     }
 
     public void setAvatar(BufferedImage avatar) {
-        this.avatar = avatar;
+        if (StringUtil.notEmpty(avatarUrl)) {
+            ImageCache.put(avatarUrl, avatar);
+        } else {
+            this.avatarRef = new SoftReference<>(avatar);
+        }
         callback();
     }
 
     public void setBgImg(BufferedImage bgImg) {
-        this.bgImg = bgImg;
+        if (StringUtil.notEmpty(bgImgUrl)) {
+            ImageCache.put(bgImgUrl, bgImg);
+        } else {
+            this.bgImgRef = new SoftReference<>(bgImg);
+        }
         callback2();
     }
-
+    
     private void callback() {
         if (invokeLater == null) return;
         invokeLater.run();
@@ -202,7 +234,8 @@ public class NetUserInfo implements NetResource {
     }
 
     public boolean hasAvatarThumb() {
-        return avatarThumb != null;
+        if (StringUtil.notEmpty(avatarThumbUrl)) return ImageCache.get(avatarThumbUrl) != null;
+        return avatarThumbRef != null && avatarThumbRef.get() != null;
     }
 
     @Override

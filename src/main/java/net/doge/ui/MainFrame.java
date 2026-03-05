@@ -115,6 +115,7 @@ import net.doge.util.core.crypto.CryptoUtil;
 import net.doge.util.core.exception.ExceptionUtil;
 import net.doge.util.core.http.HttpRequest;
 import net.doge.util.core.http.HttpUtil;
+import net.doge.util.core.img.ImageCache;
 import net.doge.util.core.img.ImageUtil;
 import net.doge.util.core.io.FileUtil;
 import net.doge.util.core.json.JsonUtil;
@@ -4759,6 +4760,31 @@ public class MainFrame extends JFrame {
         tabbedPane.addChangeListener(e -> {
             updateTabUI(tabbedPane, UIStyleStorage.currUIStyle);
             int selectedIndex = tabbedPane.getSelectedIndex();
+            
+            // 内存优化：切换标签页时清空非当前页面的数据模型
+            // 尤其是网络资源相关的列表，数据量大且图片多，必须及时释放
+            if (selectedIndex != TabIndex.NET_MUSIC) netMusicListModel.clear();
+            if (selectedIndex != TabIndex.NET_PLAYLIST) netPlaylistListModel.clear();
+            if (selectedIndex != TabIndex.NET_ALBUM) netAlbumListModel.clear();
+            if (selectedIndex != TabIndex.NET_ARTIST) netArtistListModel.clear();
+            if (selectedIndex != TabIndex.NET_RADIO) netRadioListModel.clear();
+            if (selectedIndex != TabIndex.NET_MV) netMvListModel.clear();
+            if (selectedIndex != TabIndex.NET_RANK) netRankListModel.clear();
+            if (selectedIndex != TabIndex.NET_USER) netUserListModel.clear();
+            if (selectedIndex != TabIndex.DOWNLOAD_MANAGEMENT) netCommentListModel.clear();
+
+            // 内存优化：清空未执行的后台任务（图片加载、网络请求）
+            GlobalExecutors.imageExecutor.getQueue().clear();
+            // 注意：requestExecutor 可能包含一些必要的请求（如切换后的新数据请求），这里不清空，或者谨慎清空
+            // 如果希望彻底打断所有旧请求，可以也清空，但这可能会误伤新页面的请求（因为事件是顺序执行的，此时新请求可能还未入队）
+            // 更好的做法是：只清空图片队列，因为图片占用内存最大且非关键业务
+            
+            // 内存优化：切换标签页时清空全局图片缓存
+            ImageCache.clear();
+            
+            // 建议 JVM 进行垃圾回收
+            System.gc();
+            
             // 个人音乐
             if (selectedIndex == TabIndex.PERSONAL) {
                 int index = collectionTabbedPane.getSelectedIndex();

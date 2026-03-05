@@ -5,6 +5,9 @@ import net.doge.util.core.StringUtil;
 import net.doge.util.core.text.LangUtil;
 
 import java.awt.image.BufferedImage;
+import java.lang.ref.SoftReference;
+
+import net.doge.util.core.img.ImageCache;
 
 /**
  * @author Doge
@@ -22,7 +25,7 @@ public class NetCommentInfo {
     // 用户名
     private String username;
     // 头像
-    private BufferedImage profile;
+    private SoftReference<BufferedImage> profileRef;
     // 头像 url
     private String profileUrl;
     // 内容
@@ -51,17 +54,26 @@ public class NetCommentInfo {
         return StringUtil.notEmpty(profileUrl);
     }
 
+    public void setProfile(BufferedImage profile) {
+        if (StringUtil.notEmpty(profileUrl)) {
+            ImageCache.put(profileUrl, profile);
+        } else {
+            this.profileRef = new SoftReference<>(profile);
+        }
+        callback();
+    }
+    
+    public BufferedImage getProfile() {
+        if (StringUtil.notEmpty(profileUrl)) return ImageCache.get(profileUrl);
+        return profileRef != null ? profileRef.get() : null;
+    }
+
     public boolean hasLikedCount() {
         return likedCount != null && likedCount >= 0;
     }
 
     public boolean hasScore() {
         return score != null && score >= 0;
-    }
-
-    public void setProfile(BufferedImage profile) {
-        this.profile = profile;
-        callback();
     }
 
     private void callback() {

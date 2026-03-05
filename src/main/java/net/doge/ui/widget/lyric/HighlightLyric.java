@@ -329,10 +329,21 @@ public class HighlightLyric {
 
     public void setRatio(double ratio) {
         if (width == 0 || height == 0) return;
+        
+        // 确保 buffImg 存在
+        if (buffImg == null || buffImg.getWidth() != width || buffImg.getHeight() != height) {
+            buffImg = ImageUtil.createTransparentImage(width, height);
+        }
+
         int pw = width - 2 * shadowHOffset, t = (int) (shadowHOffset + pw * ratio + 0.5);
-        // 虽然不断创建新的图像存在性能开销，但是单例清除图像时会闪烁
-        buffImg = ImageUtil.createTransparentImage(width, height);
+        
         Graphics2D g2d = GraphicsUtil.setup(buffImg.createGraphics());
+        
+        // 清空画布
+        g2d.setComposite(AlphaComposite.Clear);
+        g2d.fillRect(0, 0, width, height);
+        g2d.setComposite(AlphaComposite.SrcOver);
+
         if (ratio > 0) {
             // 将 buffImg 的左半部分用 buffImg1 的左半部分替换
             paintBuffImg1WithDrop(g2d, t);

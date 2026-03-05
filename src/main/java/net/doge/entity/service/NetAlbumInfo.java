@@ -6,7 +6,10 @@ import net.doge.entity.service.base.NetResource;
 import net.doge.util.core.StringUtil;
 
 import java.awt.image.BufferedImage;
+import java.lang.ref.SoftReference;
 import java.util.Objects;
+
+import net.doge.util.core.img.ImageCache;
 
 /**
  * @author Doge
@@ -26,11 +29,11 @@ public class NetAlbumInfo implements NetResource {
     // 艺术家 id
     private String artistId;
     // 封面图片
-    private BufferedImage coverImg;
+    private SoftReference<BufferedImage> coverImgRef;
     // 封面图片 url
     private String coverImgUrl;
     // 封面图片缩略图
-    private BufferedImage coverImgThumb;
+    private SoftReference<BufferedImage> coverImgThumbRef;
     // 封面图片缩略图 url
     private String coverImgThumbUrl;
     // 描述
@@ -39,7 +42,7 @@ public class NetAlbumInfo implements NetResource {
     private String publishTime;
     // 歌曲数量
     private Integer songNum;
-
+    
     // 缩略图加载后的回调函数
     private Runnable invokeLater;
 
@@ -52,7 +55,13 @@ public class NetAlbumInfo implements NetResource {
     }
 
     public boolean hasCoverImg() {
-        return coverImg != null;
+        if (StringUtil.notEmpty(coverImgUrl)) return ImageCache.get(coverImgUrl) != null;
+        return coverImgRef != null && coverImgRef.get() != null;
+    }
+    
+    public BufferedImage getCoverImg() {
+        if (StringUtil.notEmpty(coverImgUrl)) return ImageCache.get(coverImgUrl);
+        return coverImgRef != null ? coverImgRef.get() : null;
     }
 
     public boolean hasName() {
@@ -76,12 +85,25 @@ public class NetAlbumInfo implements NetResource {
     }
 
     public void setCoverImgThumb(BufferedImage coverImgThumb) {
-        this.coverImgThumb = coverImgThumb;
+        if (StringUtil.notEmpty(coverImgThumbUrl)) {
+            ImageCache.put(coverImgThumbUrl, coverImgThumb);
+        } else {
+            this.coverImgThumbRef = new SoftReference<>(coverImgThumb);
+        }
         callback();
+    }
+    
+    public BufferedImage getCoverImgThumb() {
+        if (StringUtil.notEmpty(coverImgThumbUrl)) return ImageCache.get(coverImgThumbUrl);
+        return coverImgThumbRef != null ? coverImgThumbRef.get() : null;
     }
 
     public void setCoverImg(BufferedImage coverImg) {
-        this.coverImg = coverImg;
+        if (StringUtil.notEmpty(coverImgUrl)) {
+            ImageCache.put(coverImgUrl, coverImg);
+        } else {
+            this.coverImgRef = new SoftReference<>(coverImg);
+        }
         callback();
     }
 
@@ -102,7 +124,8 @@ public class NetAlbumInfo implements NetResource {
     }
 
     public boolean hasCoverImgThumb() {
-        return coverImgThumb != null;
+        if (StringUtil.notEmpty(coverImgThumbUrl)) return ImageCache.get(coverImgThumbUrl) != null;
+        return coverImgThumbRef != null && coverImgThumbRef.get() != null;
     }
 
     @Override

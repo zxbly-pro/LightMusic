@@ -45,6 +45,8 @@ public class NetUserListRenderer extends CustomListCellRenderer {
 
     private static ImageIcon userIcon = new ImageIcon(ImageUtil.width(LMIconManager.getImage("list.userItem"), ImageConstants.MEDIUM_WIDTH));
 
+    private final ImageIcon reusableIcon = new ImageIcon();
+
     public NetUserListRenderer() {
         init();
     }
@@ -70,6 +72,8 @@ public class NetUserListRenderer extends CustomListCellRenderer {
         fanLabel.setOpacity(opacity);
         playlistCountLabel.setOpacity(opacity);
 
+        outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
+
         int sh = ScaleUtil.scale(10);
         outerPanel.add(CustomBox.createVerticalStrut(sh));
         outerPanel.add(avatarLabel);
@@ -90,7 +94,12 @@ public class NetUserListRenderer extends CustomListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         NetUserInfo userInfo = (NetUserInfo) value;
 
-        avatarLabel.setIcon(userInfo.hasAvatarThumb() ? new ImageIcon(userInfo.getAvatarThumb()) : userIcon);
+        if (userInfo.hasAvatarThumb()) {
+            reusableIcon.setImage(userInfo.getAvatarThumb());
+            avatarLabel.setIcon(reusableIcon);
+        } else {
+            avatarLabel.setIcon(userIcon);
+        }
 
         outerPanel.setForeground(isSelected ? selectedColor : foreColor);
         avatarLabel.setForeground(textColor);
@@ -102,8 +111,8 @@ public class NetUserListRenderer extends CustomListCellRenderer {
         fanLabel.setForeground(textColor);
         playlistCountLabel.setForeground(textColor);
 
-        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
-        outerPanel.setLayout(layout);
+//        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
+//        outerPanel.setLayout(layout);
 
         int pw = RendererConstants.CELL_WIDTH, tw = RendererConstants.TEXT_WIDTH;
         String source = "<html></html>";

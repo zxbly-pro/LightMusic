@@ -42,6 +42,8 @@ public class NetRankListRenderer extends CustomListCellRenderer {
 
     private ImageIcon rankIcon = new ImageIcon(ImageUtil.width(LMIconManager.getImage("list.rankItem"), ImageConstants.MEDIUM_WIDTH));
 
+    private final ImageIcon reusableIcon = new ImageIcon();
+
     public NetRankListRenderer() {
         init();
     }
@@ -63,6 +65,9 @@ public class NetRankListRenderer extends CustomListCellRenderer {
         updateFreLabel.setOpacity(opacity);
         updateTimeLabel.setOpacity(opacity);
 
+        // 设置布局
+        outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
+
         int sh = ScaleUtil.scale(10);
         outerPanel.add(CustomBox.createVerticalStrut(sh));
         outerPanel.add(iconLabel);
@@ -81,7 +86,12 @@ public class NetRankListRenderer extends CustomListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         NetRankInfo rankInfo = (NetRankInfo) value;
 
-        iconLabel.setIcon(rankInfo.hasCoverImgThumb() ? new ImageIcon(rankInfo.getCoverImgThumb()) : rankIcon);
+        if (rankInfo.hasCoverImgThumb()) {
+            reusableIcon.setImage(rankInfo.getCoverImgThumb());
+            iconLabel.setIcon(reusableIcon);
+        } else {
+            iconLabel.setIcon(rankIcon);
+        }
 
         outerPanel.setForeground(isSelected ? selectedColor : foreColor);
         iconLabel.setForeground(textColor);
@@ -90,8 +100,8 @@ public class NetRankListRenderer extends CustomListCellRenderer {
         updateFreLabel.setForeground(textColor);
         updateTimeLabel.setForeground(textColor);
 
-        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
-        outerPanel.setLayout(layout);
+//        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
+//        outerPanel.setLayout(layout);
 
         int pw = RendererConstants.CELL_WIDTH, tw = RendererConstants.TEXT_WIDTH;
         String source = "<html></html>";

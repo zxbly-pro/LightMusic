@@ -44,6 +44,8 @@ public class NetSheetListRenderer extends CustomListCellRenderer {
 
     private static ImageIcon sheetIcon = new ImageIcon(ImageUtil.width(LMIconManager.getImage("list.sheetItem"), ImageConstants.MEDIUM_WIDTH));
 
+    private final ImageIcon reusableIcon = new ImageIcon();
+
     public NetSheetListRenderer() {
         init();
     }
@@ -71,6 +73,8 @@ public class NetSheetListRenderer extends CustomListCellRenderer {
         bpmLabel.setOpacity(opacity);
         pageSizeLabel.setOpacity(opacity);
 
+        outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
+
         int sh = ScaleUtil.scale(10);
         outerPanel.add(CustomBox.createVerticalStrut(sh));
         outerPanel.add(iconLabel);
@@ -95,7 +99,12 @@ public class NetSheetListRenderer extends CustomListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         NetSheetInfo sheetInfo = (NetSheetInfo) value;
 
-        iconLabel.setIcon(sheetInfo.hasCoverImg() ? new ImageIcon(sheetInfo.getCoverImg()) : sheetIcon);
+        if (sheetInfo.hasCoverImg()) {
+            reusableIcon.setImage(sheetInfo.getCoverImg());
+            iconLabel.setIcon(reusableIcon);
+        } else {
+            iconLabel.setIcon(sheetIcon);
+        }
 
         outerPanel.setForeground(isSelected ? selectedColor : foreColor);
         iconLabel.setForeground(textColor);
@@ -107,8 +116,8 @@ public class NetSheetListRenderer extends CustomListCellRenderer {
         bpmLabel.setForeground(textColor);
         pageSizeLabel.setForeground(textColor);
 
-        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
-        outerPanel.setLayout(layout);
+//        BoxLayout layout = new BoxLayout(outerPanel, BoxLayout.Y_AXIS);
+//        outerPanel.setLayout(layout);
 
         int pw = RendererConstants.CELL_WIDTH, tw = RendererConstants.TEXT_WIDTH;
         String source = "<html></html>";

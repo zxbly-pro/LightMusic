@@ -91,6 +91,9 @@ public class CustomButton extends BaseButton implements ExtendedOpacitySupported
         SwingUtil.setTreeExtendedOpacity(this, extendedOpacity);
     }
 
+    private BufferedImage cachedMaskImg;
+    private int cachedMaskImgWidth;
+
     @Override
     public void paintComponent(Graphics g) {
         // 画背景
@@ -103,8 +106,11 @@ public class CustomButton extends BaseButton implements ExtendedOpacitySupported
                 int arc = ScaleUtil.scale(10);
                 g2d.fillRoundRect(0, 0, w, h, arc, arc);
             } else {
-                BufferedImage img = ImageUtil.width(maskImg, w);
-                g2d.drawImage(img, 0, 0, w, h, null);
+                if (cachedMaskImg == null || cachedMaskImgWidth != w) {
+                    cachedMaskImg = ImageUtil.width(maskImg, w);
+                    cachedMaskImgWidth = w;
+                }
+                g2d.drawImage(cachedMaskImg, 0, 0, w, h, null);
             }
         }
         GraphicsUtil.srcOver(g, extendedOpacity);

@@ -44,6 +44,8 @@ public class NetCommentListRenderer extends CustomListCellRenderer {
 
     private static ImageIcon defaultProfile = new ImageIcon(ImageUtil.radius(ImageUtil.width(LMIconManager.getImage("list.profile"), ImageConstants.PROFILE_WIDTH), ScaleUtil.scale(0.1)));
 
+    private final ImageIcon reusableIcon = new ImageIcon();
+
     public NetCommentListRenderer() {
         init();
     }
@@ -79,7 +81,12 @@ public class NetCommentListRenderer extends CustomListCellRenderer {
 
         int lw = list.getVisibleRect().width - ScaleUtil.scale(10);
 
-        iconLabel.setIcon(profile != null ? new ImageIcon(profile) : defaultProfile);
+        if (profile != null) {
+            reusableIcon.setImage(profile);
+            iconLabel.setIcon(reusableIcon);
+        } else {
+            iconLabel.setIcon(defaultProfile);
+        }
         textLabel.setText(HtmlUtil.textToHtmlWithSpace(HtmlUtil.wrapLineByWidth(commentInfo.toString(), lw - ScaleUtil.scale(sub ? 235 : 160))));
 
         // 缩进

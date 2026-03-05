@@ -6,7 +6,10 @@ import net.doge.entity.service.base.NetResource;
 import net.doge.util.core.StringUtil;
 
 import java.awt.image.BufferedImage;
+import java.lang.ref.SoftReference;
 import java.util.Objects;
+
+import net.doge.util.core.img.ImageCache;
 
 /**
  * @author Doge
@@ -22,11 +25,11 @@ public class NetRankInfo implements NetResource {
     // 榜单名称
     private String name;
     // 封面图片
-    private BufferedImage coverImg;
+    private SoftReference<BufferedImage> coverImgRef;
     // 封面图片 url
     private String coverImgUrl;
     // 封面图片缩略图
-    private BufferedImage coverImgThumb;
+    private SoftReference<BufferedImage> coverImgThumbRef;
     // 描述
     private String description;
     // 播放量
@@ -60,16 +63,35 @@ public class NetRankInfo implements NetResource {
     }
 
     public boolean hasCoverImg() {
-        return coverImg != null;
+        if (StringUtil.notEmpty(coverImgUrl)) return ImageCache.get(coverImgUrl) != null;
+        return coverImgRef != null && coverImgRef.get() != null;
+    }
+    
+    public BufferedImage getCoverImg() {
+        if (StringUtil.notEmpty(coverImgUrl)) return ImageCache.get(coverImgUrl);
+        return coverImgRef != null ? coverImgRef.get() : null;
     }
 
     public void setCoverImgThumb(BufferedImage coverImgThumb) {
-        this.coverImgThumb = coverImgThumb;
+        if (StringUtil.notEmpty(coverImgUrl)) {
+            ImageCache.put(coverImgUrl + "_thumb", coverImgThumb);
+        } else {
+            this.coverImgThumbRef = new SoftReference<>(coverImgThumb);
+        }
         callback();
+    }
+    
+    public BufferedImage getCoverImgThumb() {
+        if (StringUtil.notEmpty(coverImgUrl)) return ImageCache.get(coverImgUrl + "_thumb");
+        return coverImgThumbRef != null ? coverImgThumbRef.get() : null;
     }
 
     public void setCoverImg(BufferedImage coverImg) {
-        this.coverImg = coverImg;
+        if (StringUtil.notEmpty(coverImgUrl)) {
+            ImageCache.put(coverImgUrl, coverImg);
+        } else {
+            this.coverImgRef = new SoftReference<>(coverImg);
+        }
         callback();
     }
 
@@ -90,7 +112,8 @@ public class NetRankInfo implements NetResource {
     }
 
     public boolean hasCoverImgThumb() {
-        return coverImgThumb != null;
+        if (StringUtil.notEmpty(coverImgUrl)) return ImageCache.get(coverImgUrl + "_thumb") != null;
+        return coverImgThumbRef != null && coverImgThumbRef.get() != null;
     }
 
     @Override
